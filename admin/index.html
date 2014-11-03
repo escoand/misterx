@@ -1,0 +1,25 @@
+<html>
+	<head>
+		<title>MisterX Admin</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+		<!--<meta http-equiv="refresh" content="60">-->
+		<script src="http://openlayers.org/en/v3.0.0/build/ol.js" type="text/javascript"></script>
+		<link href="http://openlayers.org/en/v3.0.0/css/ol.css" rel="stylesheet" type="text/css" />
+		<script src="../map/misterx.js" type="text/javascript"></script>
+		<script src="admin.js" type="text/javascript"></script>
+		<link href="style.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body id="map" onload="init();admin();refreshClients();">
+		<div id="popup" class="ol-popup">
+			<a href="#" id="popup-closer" class="ol-popup-closer"></a>
+			<input id="data" type="hidden" />
+			<select id="dropdown" onchange="document.getElementById('misterx').value=this.value;"></select>
+			<input id="misterx" />
+			<input type="button" onclick="submit();" value="submit" />
+		</div>
+		<table id="clients">
+			<tr><th>Name</th><th>IP:Port</th><th>Time</th><th></th></tr>
+		</table>
+	</body>
+</html>

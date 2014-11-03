@@ -1,0 +1,9 @@
+AuthType Basic
+AuthName "Restricted Files"
+AuthBasicProvider file
+AuthUserFile .htpasswd
+Require user admin
+
+RewriteEngine on
+RewriteRule ^position/(.*) http://localhost:5005/$1 [P]
+RewriteRule ^status/(.*) http://localhost:6006/ [P]
