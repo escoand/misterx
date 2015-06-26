@@ -201,7 +201,7 @@ sub strxor {
 sub logpoint {
 	my ($name, $dt, $lat, $lon, $speed, $ele) = @_;
 	my $filename = $name;
-	$filename =~ s/[^A-Za-z0-9 ]/_/g;
+	$filename =~ s/[^A-Za-z0-9 ]+/_/g;
 	$filename .= "." . $format;
 
 	# gpx format
