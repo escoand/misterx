@@ -247,9 +247,9 @@ sub logpoint {
 		# create file
 		if (! -e $filename) {
 			open $fh, ">", $filename;
-			print $fh "AXXX perl_gps_logger\r\n";
-			printf $fh "HFDTE%02i%02i%02i\r\n", substr($dt, 8, 2), substr($dt, 5, 2), substr($dt, 2, 2);
-			printf $fh "HOPLTPILOT: %s\r\n", $filename;
+			print $fh "AXXX perl_gps_logger\n";
+			printf $fh "HFDTE%02i%02i%02i\n", substr($dt, 8, 2), substr($dt, 5, 2), substr($dt, 2, 2);
+			printf $fh "HOPLTPILOT: %s\n", $filename;
 		}
 
 		# write point
