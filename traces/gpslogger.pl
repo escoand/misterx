@@ -12,6 +12,10 @@ use URI::Escape;
 
 # format igc or gpx
 my $format = "igc";
+# dump current positions to file
+my $dumpfile = "~/misterx/map/positions.kml";
+# wait x seconds until dump current position
+my $dumpwait = 300;
 
 # open socket
 my $client_sock = IO::Socket::INET->new(
@@ -21,18 +25,10 @@ my $client_sock = IO::Socket::INET->new(
 	Proto		=> "tcp",
 	ReuseAddr	=> 1,
 );
-my $status_sock = IO::Socket::INET->new(
-	Listen		=> 5, # max clients
-	LocalAddr	=> "127.0.0.1",
-	LocalPort	=> 6006,
-	Proto		=> "tcp",
-	ReuseAddr	=> 1,
-);
 
 # init select
 my $read_select  = IO::Select->new();
 $read_select->add($client_sock);
-$read_select->add($status_sock);
 my %clients = ();
 
 # main loop
@@ -42,31 +38,25 @@ while(1) {
 	#my @read = $read_select->can_read();   
 	foreach my $read ($read_select->can_read()) {
 
-		# status request
-		if ($read == $status_sock) {
-			my $new_tcp = $read->accept();
-			print $new_tcp "HTTP/1.1 200 OK\nConnection: close\n\n[";
-			my $i = 1;
-			foreach my $client (keys %clients) {
-				printf $new_tcp ($i++ > 1 ? "," : "") . "{\"address\":\"%s\"", $client;
-				foreach my $attrib (keys %{$clients{$client}}) {
-					printf $new_tcp ",\"%s\":\"%s\"", $attrib, $clients{$client}{$attrib};
-				}
-				print $new_tcp "}";
-			}
-			print $new_tcp "]";
-			$new_tcp->flush;
-			#logging("status request");
-			$new_tcp->close();
-			next;
+		# dump positions
+		open my $fh, ">", $dumpfile;
+		print $fh "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+		print $fh "<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n";
+		print $fh "<Document>\n";
+		my $cnt = 0;
+		foreach my $client (keys %clients) {
+			printf $fh "<Placemark><name>%s</name><Point><coordinates>%s,%s,0</coordinates></Point><styleUrl>#%s%i</styleUrl></Placemark>\n",
+				$clients{$client}{name}, $clients{$client}{lon}, $clients{$client}{lat}, "pin", ++$cnt;
 		}
+		print $fh "</Document>\n";
+		print $fh "</kml>\n";
+		close $fh;
 
 		# new socket
-		if ($read == $client_sock) {
+		if($read == $client_sock) {
 			my $new_tcp = $read->accept();
 			$read_select->add($new_tcp);
 			my $peeraddr = sprintf "%s:%i", $new_tcp->peerhost(), $new_tcp->peerport();
-			$clients{$peeraddr}{status} = "connected";
 			#logging($peeraddr . " connected");
 			next;
 		}
@@ -74,10 +64,11 @@ while(1) {
 		# read from socket
 		my $peeraddr = sprintf "%s:%i", $read->peerhost(), $read->peerport();
 		my $data = <$read>;
+		$data =~ s/[\r\n]+$//;
 		my $html = 0;
 
 		# socket closed
-		if (!$data) {
+		if(!$data) {
 			$clients{$peeraddr}{status} = "disconnected";
 			$read_select->remove($read);
 			$read->close();
@@ -85,16 +76,36 @@ while(1) {
 			next;
 		}
 
-		# data on socket
-		$clients{$peeraddr}{time} = localtime();
-		$data =~ s/[\r\n]+$//;
+		# status request
+		elsif($data =~ /^GET \/status(|\/[^ ]*) HTTP\/([0-9.]+)$/) {
+			#logging("status and close");
+			while(<$read>) { /^[\r\n]+$/ and last; }
+			print $read "HTTP/1.0 200 OK\n\n[";
+			my $i = 1;
+			foreach my $client (keys %clients) {
+				printf $read ($i++ > 1 ? "," : "") . "{\"address\":\"%s\"", $client;
+				foreach my $attrib (keys %{$clients{$client}}) {
+					printf $read ",\"%s\":\"%s\"", $attrib, $clients{$client}{$attrib};
+				}
+				print $read "}";
+			}
+			print $read "]\n";
+			$read_select->remove($read);
+			$read->flush();
+			$read->close();
+			next;
+		}
 
 		# gts http request
-		if($data =~ /^GET .*&id=(.*).*&gprmc=(.*) HTTP\/([0-9.]+)$/) {
-			$clients{$peeraddr}{name} = uri_unescape($1);
-			$data = uri_unescape($2);
-			$html = $3;
+		elsif($data =~ /^GET (|.*&)id=(.*).*&gprmc=(.*) HTTP\/([0-9.]+)$/) {
+			$clients{$peeraddr}{name} = uri_unescape($2);
+			$data = uri_unescape($3);
+			$html = $4;
 		}
+
+		# default settings
+		$clients{$peeraddr}{status} = "connected";
+		$clients{$peeraddr}{time} = localtime();
 
 		# checksum (xor of every byte)
 		if($data !~ s/\$(.*)\*([0-9a-zA-Z]{2})$/$1/) {
@@ -174,13 +185,19 @@ while(1) {
 			logging($peeraddr . " unknown message: " . $data);
 			$read_select->remove($read);
 			$read->close();
+			next;
 		}
 
 		# http return code
 		if($html) {
+			my $shortaddr = $peeraddr;
+			$shortaddr =~ s/:.*//;
 			while(<$read>) { /^[\r\n]+$/ and last; }
-			print $read "HTTP/$html 200 OK\nConnection: close\n\n";
+			print $read "HTTP/$html 200 OK\n\n";
 			$clients{$peeraddr}{proto} = "HTML";
+			$clients{$peeraddr}{status} = "disconnected";
+			$clients{$shortaddr} = $clients{$peeraddr};
+			delete $clients{$peeraddr};
 			$read_select->remove($read);
 			$read->close();
 		}

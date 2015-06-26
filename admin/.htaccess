@@ -6,4 +6,4 @@ Require user admin
 
 RewriteEngine on
 RewriteRule ^position/(.*) http://localhost:5005/$1 [P]
-RewriteRule ^status/(.*) http://localhost:6006/ [P]
+RewriteRule ^status($|/.*) http://localhost:5005/status [P]
