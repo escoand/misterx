@@ -262,9 +262,9 @@ sub logpoint {
 		my $lon_d = int($lon);
 		my $lon_m = ($lon - $lon_d) * 60;
 		my $lon_s = ($lon_m - int($lon_m)) * 1000;
-		printf $fh "B%02i%02i%02i%02i%02i%03iN%03i%02i%03iEA00000%05i\r\n",
+		printf $fh "B%02i%02i%02i%02i%02i%03iN%03i%02i%03iEA00000%05i\n",
 			substr($dt, 11, 2), substr($dt, 14, 2), substr($dt, 17, 2),
-			$lat_d, $lat_m, $lat_s, $lon_d, $lon_m, $lon_s, $ele;
+			$lat_d, $lat_m, $lat_s, $lon_d, $lon_m, $lon_s, ($ele ? $ele : 0);
 	}
 }
 
