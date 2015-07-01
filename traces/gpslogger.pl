@@ -11,12 +11,13 @@ use IO::Select;
 use POSIX qw(strftime);
 use URI::Escape;
 
-# format igc or gpx
-my $format = "igc";
 # dump current positions to file
 my $dumpfile = "~/misterx/map/positions.kml";
 # wait x seconds until dump current position
 my $dumpwait = 300;
+# track positions (gpx, igc)
+my $trackformat = "igc";
+my $trackdir = ".";
 
 # open socket
 my $client_sock = IO::Socket::INET->new(
@@ -219,10 +220,10 @@ sub logpoint {
 	my ($name, $dt, $lat, $lon, $speed, $ele) = @_;
 	my $filename = $name;
 	$filename =~ s/[^A-Za-z0-9 ]+/_/g;
-	$filename .= "." . $format;
+	$filename = $trackdir . "/" . $filename . "." . $trackformat;
 
 	# gpx format
-	if($format eq "gpx") {
+	if($trackformat eq "gpx") {
 
 		# create file
 		if (! -e $filename) {
@@ -258,7 +259,7 @@ sub logpoint {
 	}
 
 	# igc format
-	elsif($format eq "igc") {
+	elsif($trackformat eq "igc") {
 		my $fh;
 
 		# create file
