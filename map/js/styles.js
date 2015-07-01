@@ -21,7 +21,7 @@ var icons = [
 	'../map/img/marker_blue.png',
 	'../map/img/marker_yellow.png',
 	'../map/img/marker_fuchsia.png',
-	'../map/img/marker_purple.png',
+	'../map/img/marker_aqua.png',
 	'../map/img/marker_maroon.png',
 	'../map/img/marker_green.png',
 	'../map/img/marker_navy.png',
