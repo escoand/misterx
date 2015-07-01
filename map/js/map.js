@@ -1,4 +1,4 @@
-var dataUrl = "positions.geojson";
+var dataUrl = "../map/positions.geojson";
 var refreshInterval = 30;
 
 var map;
