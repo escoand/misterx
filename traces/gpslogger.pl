@@ -66,7 +66,7 @@ while(1) {
 
 		# status request
 		elsif($data =~ /^GET \/status(|\/[^ ]*) HTTP\/([0-9.]+)$/) {
-			#logging("status and close");
+			#logging($peeraddr . " status request");
 			while(<$read>) { /^[\r\n]+$/ and last; }
 			print $read "HTTP/1.0 200 OK\n\n[";
 			my $i = 1;
@@ -104,11 +104,11 @@ while(1) {
 
 		# checksum (xor of every byte)
 		if($data !~ s/\$(.*)\*([0-9a-zA-Z]{2})$/$1/) {
-			$clients{$peeraddr}{status} = "error";
+			$clients{$peeraddr}{status} = "error_msg";
 			logging($peeraddr . " wrong message: " . $data);
 		}
 		elsif(uc $2 ne strxor($1)) {
-			$clients{$peeraddr}{status} = "error";
+			$clients{$peeraddr}{status} = "error_chk";
 			logging($peeraddr . " wrong checksum (" . $2 . "!=" . strxor($1) . "): " . $data);
 		}
 
