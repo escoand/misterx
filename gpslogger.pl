@@ -52,7 +52,7 @@ while(1) {
 		# read from socket
 		my $peeraddr = sprintf "%s:%i", $read->peerhost(), $read->peerport();
 		my $data = <$read>;
-		$data =~ s/[\r\n]+$//;
+		$data =~ s/[\r\n]+$// if $data;
 		my $html = 0;
 
 		# socket closed
