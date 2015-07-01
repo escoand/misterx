@@ -68,7 +68,7 @@ while(1) {
 		elsif($data =~ /^GET \/status(|\/[^ ]*) HTTP\/([0-9.]+)$/) {
 			#logging($peeraddr . " status request");
 			while(<$read>) { /^[\r\n]+$/ and last; }
-			print $read "HTTP/1.0 200 OK\n\n[";
+			print $read "HTTP/1.0 200 OK\nContent-type: application/json\n\n[";
 			my $i = 1;
 			foreach my $client (keys %clients) {
 				printf $read ($i++ > 1 ? "," : "") . "{\"address\":\"%s\"", $client;
