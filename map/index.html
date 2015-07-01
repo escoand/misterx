@@ -1,12 +1,18 @@
+<!DOCTYPE html>
 <html>
 	<head>
-		<title>MisterX Map</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-		<meta http-equiv="refresh" content="120">
-		<script src="http://openlayers.org/en/v3.0.0/build/ol.js" type="text/javascript"></script>
-		<script src="../map/misterx.js" type="text/javascript"></script>
-		<link href="http://openlayers.org/en/v3.0.0/css/ol.css" rel="stylesheet" type="text/css" />
+		<title>Simple example</title>
+		<!-- jquery and bootstrap -->
+		<script src="js/jquery-1.11.3.min.js"></script>
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<script src="js/bootstrap.min.js"></script>
+		<!-- openlayers -->
+		<link rel="stylesheet" href="css/ol.css" type="text/css">
+		<script src="js/ol.js"></script>
+		<!-- own -->
+		<script src="js/styles.js"></script>
+		<script src="js/map.js"></script>
+		<link rel="stylesheet" href="css/map.css" type="text/css">
 	</head>
-	<body id="map" onload="init();" style="margin:0;"></body>
+	<body><div id="map"><div id="popup"></div></div></body>
 </html>

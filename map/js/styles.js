@@ -1,0 +1,31 @@
+var colors = [
+	'rgba(255,255,255,1)',
+	'rgba(255,0,0,0.4)',
+	'rgba(0,255,0,0.4)',
+	'rgba(0,0,255,0.4)',
+	'rgba(255,255,0,0.4)',
+	'rgba(255,0,255,0.4)',
+	'rgba(0,255,255,0.4)',
+	'rgba(128,0,0,0.4)',
+	'rgba(0,128,0,0.4)',
+	'rgba(0,0,128,0.4)',
+	'rgba(128,128,0,0.4)',
+	'rgba(128,0,128,0.4)',
+	'rgba(0,128,128,0.4)',
+];
+
+var icons = [
+	null,
+	'img/marker_red.png',
+	'img/marker_lime.png',
+	'img/marker_blue.png',
+	'img/marker_yellow.png',
+	'img/marker_fuchsia.png',
+	'img/marker_purple.png',
+	'img/marker_maroon.png',
+	'img/marker_green.png',
+	'img/marker_navy.png',
+	'img/marker_olive.png',
+	'img/marker_purple.png',
+	'img/marker_teal.png',
+];
