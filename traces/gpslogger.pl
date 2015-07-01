@@ -36,7 +36,6 @@ my %clients = ();
 while(1) {
 
 	# wait for data
-	#my @read = $read_select->can_read();   
 	foreach my $read ($read_select->can_read()) {
 
 		# dump positions
