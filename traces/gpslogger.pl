@@ -182,7 +182,8 @@ while(1) {
 
 		# wrong data
 		else {
-			$clients{$peeraddr}{status} = "ERROR";
+			while(<$read>) { /^[\r\n]+$/ and last; }
+			$clients{$peeraddr}{status} = "error";
 			logging($peeraddr . " unknown message: " . $data);
 			$read_select->remove($read);
 			$read->close();
@@ -195,12 +196,14 @@ while(1) {
 			$shortaddr =~ s/:.*//;
 			while(<$read>) { /^[\r\n]+$/ and last; }
 			print $read "HTTP/$html 200 OK\n\n";
+			$read_select->remove($read);
+			$read->close();
+
+			# re-index client
 			$clients{$peeraddr}{proto} = "HTML";
 			$clients{$peeraddr}{status} = "disconnected";
 			$clients{$shortaddr} = $clients{$peeraddr};
 			delete $clients{$peeraddr};
-			$read_select->remove($read);
-			$read->close();
 		}
 	}
 }
