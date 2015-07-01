@@ -73,9 +73,10 @@ function init(){
 		if (feature && feature.getGeometry() instanceof ol.geom.GeometryCollection) {
 			var coord = feature.getGeometry().getGeometries()[1].getCoordinates();
 			map.getOverlays().getArray()[0].setPosition(coord);
+			$(popup).popover("destroy");
 			$(popup).popover({
 				"placement": "right",
-				"content": feature.get("name")
+				"content": feature.get("name"),
 			});
 			$(popup).popover("show");
 		} else {
