@@ -91,6 +91,15 @@ while(1) {
 			$html = $4;
 		}
 
+		# unknown http request
+		elsif($data =~ /^GET (.*) HTTP\/([0-9.]+)$/) {
+			#logging($peeraddr . " unknown http request: " . $data);
+			while(<$read>) { /^[\r\n]+$/ and last; }
+			$read_select->remove($read);
+			$read->close();
+			next;
+		}
+
 		# default settings
 		$clients{$peeraddr}{status} = "connected";
 		$clients{$peeraddr}{time} = strftime "%Y-%m-%d %H:%M:%S", localtime;
