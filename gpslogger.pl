@@ -13,10 +13,10 @@ use URI::Escape;
 
 # track positions (gpx, igc)
 my $trackformat = "igc";
-my $trackdir = ".";
+my $trackdir = "tracks";
 # dump last positions (geojson, kml)
 my $dumpformat = "geojson";
-my $dumpfile = "positions.geojson";
+my $dumpfile = "map/positions.geojson";
 my $dumpwait = 300;
 
 # open socket
@@ -29,7 +29,7 @@ my $client_sock = IO::Socket::INET->new(
 );
 
 # init select
-my $read_select  = IO::Select->new();
+my $read_select = IO::Select->new();
 $read_select->add($client_sock);
 my %clients = ();
 my $lastdumptime = 0;
