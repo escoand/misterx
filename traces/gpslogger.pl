@@ -11,13 +11,13 @@ use IO::Select;
 use POSIX qw(strftime);
 use URI::Escape;
 
-# dump current positions to file
-my $dumpfile = "~/misterx/map/positions.kml";
-# wait x seconds until dump current position
-my $dumpwait = 300;
 # track positions (gpx, igc)
 my $trackformat = "igc";
 my $trackdir = ".";
+# dump last positions (geojson, kml)
+my $dumpformat = "geojson";
+my $dumpfile = "dump.geojson";
+my $dumpwait = 10;
 
 # open socket
 my $client_sock = IO::Socket::INET->new(
@@ -32,26 +32,13 @@ my $client_sock = IO::Socket::INET->new(
 my $read_select  = IO::Select->new();
 $read_select->add($client_sock);
 my %clients = ();
+my $lastdumptime = 0;
 
 # main loop
 while(1) {
 
 	# wait for data
 	foreach my $read ($read_select->can_read()) {
-
-		# dump positions
-		open my $fh, ">", $dumpfile;
-		print $fh "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-		print $fh "<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n";
-		print $fh "<Document>\n";
-		my $cnt = 0;
-		foreach my $client (keys %clients) {
-			printf $fh "<Placemark><name>%s</name><Point><coordinates>%s,%s,0</coordinates></Point><styleUrl>#%s%i</styleUrl></Placemark>\n",
-				$clients{$client}{name}, $clients{$client}{lon}, $clients{$client}{lat}, "pin", ++$cnt;
-		}
-		print $fh "</Document>\n";
-		print $fh "</kml>\n";
-		close $fh;
 
 		# new socket
 		if($read == $client_sock) {
@@ -107,6 +94,13 @@ while(1) {
 		# default settings
 		$clients{$peeraddr}{status} = "connected";
 		$clients{$peeraddr}{time} = strftime "%Y-%m-%d %H:%M:%S", localtime;
+
+		# dump positions
+		if ($lastdumptime < time - $dumpwait) {
+			#logging("dump positions");
+			dumppoints();
+			$lastdumptime = time;
+		}
 
 		# checksum (xor of every byte)
 		if($data !~ s/\$(.*)\*([0-9a-zA-Z]{2})$/$1/) {
@@ -287,6 +281,40 @@ sub logpoint {
 			substr($dt, 11, 2), substr($dt, 14, 2), substr($dt, 17, 2),
 			$lat_d, $lat_m, $lat_s, $lon_d, $lon_m, $lon_s, ($ele ? $ele : 0);
 	}
+}
+
+# dump last positions
+sub dumppoints {
+	my $cnt = 0;
+	open my $fh, ">", $dumpfile;
+
+	# kml format
+	if ($dumpformat eq "kml") {
+		print $fh "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+		print $fh "<kml xmlns=\"http://www.opengis.net/kml/2.2\">";
+		print $fh "<Document>";
+		foreach my $client (keys %clients) {
+			next if !$clients{$client}{lon};
+			printf $fh "<Placemark><name>%s</name><Point><coordinates>%s,%s,0</coordinates></Point><styleUrl>#%s%i</styleUrl></Placemark>",
+				$clients{$client}{name}, $clients{$client}{lon}, $clients{$client}{lat}, "pin", ++$cnt;
+		}
+		print $fh "</Document>";
+		print $fh "</kml>";
+	}
+
+	# geojson format
+	elsif ($dumpformat eq "geojson") {
+		print $fh '{"type":"FeatureCollection","features":[';
+		foreach my $client (keys %clients) {
+			next if !$clients{$client}{lon};
+			printf $fh "," if $cnt++ > 0;
+			printf $fh '{"type":"Feature","properties":{"name":"%s"},"geometry":{"type":"Point","coordinates":[%s,%s]}}',
+				$clients{$client}{name}, $clients{$client}{lon}, $clients{$client}{lat};
+		}
+		print $fh "]}";
+	}
+
+	close $fh;
 }
 
 # log message
