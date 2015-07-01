@@ -8,6 +8,7 @@ use File::Copy;
 use IO::Handle;
 use IO::Socket;
 use IO::Select;
+use POSIX qw(strftime);
 use URI::Escape;
 
 # format igc or gpx
@@ -105,7 +106,7 @@ while(1) {
 
 		# default settings
 		$clients{$peeraddr}{status} = "connected";
-		$clients{$peeraddr}{time} = localtime();
+		$clients{$peeraddr}{time} = strftime "%Y-%m-%d %H:%M:%S", localtime;
 
 		# checksum (xor of every byte)
 		if($data !~ s/\$(.*)\*([0-9a-zA-Z]{2})$/$1/) {
