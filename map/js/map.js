@@ -1,3 +1,4 @@
+var mapCenter = [12.4677, 50.711, 12.5079, 50.729];
 var dataUrl = "../map/positions.geojson";
 var refreshInterval = 30;
 
@@ -34,6 +35,12 @@ var styleFunction = function(feature, resolution) {
 function init(){
 	popup = document.getElementById("popup");
 
+	mapExtent = ol.proj.transformExtent(mapCenter, "EPSG:4326", "EPSG:3857");
+	mapCenter = [
+		(mapExtent[0] + mapExtent[2]) / 2,
+		(mapExtent[1] + mapExtent[3]) / 2,
+	];
+
 	map = new ol.Map({
 		target: "map",
 		controls: [
@@ -50,6 +57,13 @@ function init(){
 				}),
 				style: styleFunction,
 			}),
+			new ol.layer.Image({
+				source: new ol.source.ImageStatic({
+					url: "http://daten.ec-hasslau.de/misterx/2014/spielfeld.png",
+					imageExtent: mapExtent,
+					imageSize: [1488, 1052],
+				}),
+			}),
 		],
 		overlays: [
 			new ol.Overlay({
@@ -59,8 +73,8 @@ function init(){
 			})
 		],
 		view: new ol.View({
-			center: ol.proj.transform([-73.7, 47.9], 'EPSG:4326', 'EPSG:3857'),
-			zoom: 10
+			center: mapCenter,
+			zoom: 15,
 		})
 	});
 
@@ -94,7 +108,7 @@ function refresh() {
 	map.getLayers().getArray()[1].setSource(
 		new ol.source.Vector({
 			url: dataUrl,
-			format: new ol.format.GeoJSON()
+			format: new ol.format.GeoJSON(),
 		})
 	);
 }
