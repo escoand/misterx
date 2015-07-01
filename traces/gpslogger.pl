@@ -16,8 +16,8 @@ my $trackformat = "igc";
 my $trackdir = ".";
 # dump last positions (geojson, kml)
 my $dumpformat = "geojson";
-my $dumpfile = "dump.geojson";
-my $dumpwait = 10;
+my $dumpfile = "positions.geojson";
+my $dumpwait = 300;
 
 # open socket
 my $client_sock = IO::Socket::INET->new(
