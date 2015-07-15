@@ -16,7 +16,7 @@ my $trackformat = "igc";
 my $trackdir = "tracks";
 # dump last positions (geojson, kml)
 my $dumpformat = "geojson";
-my $dumpfile = "map/positions.geojson";
+my $dumpfile = "../map/positions.geojson";
 my $dumpwait = 300;
 
 # open socket
@@ -45,7 +45,7 @@ while(1) {
 			my $new_tcp = $read->accept();
 			$read_select->add($new_tcp);
 			my $peeraddr = sprintf "%s:%i", $new_tcp->peerhost(), $new_tcp->peerport();
-			#logging($peeraddr . " connected");
+			logging($peeraddr . " connected");
 			next;
 		}
 
@@ -60,13 +60,13 @@ while(1) {
 			$clients{$peeraddr}{status} = "disconnected";
 			$read_select->remove($read);
 			$read->close();
-			#logging($peeraddr . " disconnected");
+			logging($peeraddr . " disconnected");
 			next;
 		}
 
 		# status request
 		elsif($data =~ /^GET \/status(|\/[^ ]*) HTTP\/([0-9.]+)$/) {
-			#logging($peeraddr . " status request");
+			logging($peeraddr . " status request");
 			while(<$read>) { /^[\r\n]+$/ and last; }
 			print $read "HTTP/1.0 200 OK\nContent-type: application/json\n\n[";
 			my $i = 1;
@@ -93,7 +93,7 @@ while(1) {
 
 		# unknown http request
 		elsif($data =~ /^GET (.*) HTTP\/([0-9.]+)$/) {
-			#logging($peeraddr . " unknown http request: " . $data);
+			logging($peeraddr . " unknown http request: " . $data);
 			while(<$read>) { /^[\r\n]+$/ and last; }
 			$read_select->remove($read);
 			$read->close();
@@ -106,7 +106,7 @@ while(1) {
 
 		# dump positions
 		if ($lastdumptime < time - $dumpwait) {
-			#logging("dump positions");
+			logging("dump positions");
 			dumppoints();
 			$lastdumptime = time;
 		}
@@ -127,7 +127,7 @@ while(1) {
 			my $filename = $1 . ".gpx";
 			$clients{$peeraddr}{name} = $1;
 			$clients{$peeraddr}{status} = "renamed";
-			#logging($peeraddr . " named " . $1);
+			logging($peeraddr . " named " . $1);
 		}
 
 		# unknown sender
