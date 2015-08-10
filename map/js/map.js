@@ -1,118 +1,93 @@
-var mapCenter = [12.4677, 50.711, 12.5079, 50.729];
-var dataUrl = "../map/positions.geojson";
-var refreshInterval = 30;
+var refreshInterval = 20;
+var imgBounds = [[50.711, 12.4677], [50.729, 12.5079]];
 
-var map;
-var popup;
-var styleId = 0;
+var map = null;
+var markers = Array();
 
-var styleFunction = function(feature, resolution) {
+// init after load
+document.addEventListener("load", init, false);
+document.addEventListener("DOMContentLoaded", init, false);
+function init() {
+	map = L.map("map").fitBounds(imgBounds);
 
-	/* set style */
-	if(!feature.get("style"))
-		feature.set("style", ++styleId);
+	// sidebar
+	var sidebar = L.control.sidebar("sidebar", {position: "right"}).addTo(map);
 
-	/* add point at last position */
-	if(feature.getGeometry().getLastCoordinate) {
-		feature.setGeometry(new ol.geom.GeometryCollection([
-			feature.getGeometry(),
-			new ol.geom.Point(feature.getGeometry().getLastCoordinate()),
-		]));
-	}
+	// map
+	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6IjZjNmRjNzk3ZmE2MTcwOTEwMGY0MzU3YjUzOWFmNWZhIn0.Y8bhBaUMqFiPrDRW9hieoQ', {
+		maxZoom: 17,
+		id: 'mapbox.streets'
+	}).addTo(map);
 
-	return [new ol.style.Style({
-		image: new ol.style.Icon({
-			anchor: [0.5, 1],
-			src: icons[feature.get("style")],
-		}),
-		stroke: new ol.style.Stroke({
-			color: colors[feature.get("style")],
-			width: 2,
-		}),
-	})]
-};
+	// overlay
+	//L.imageOverlay("http://daten.ec-hasslau.de/misterx/2014/spielfeld.png", imgBounds).addTo(map);
 
-function init(){
-	popup = document.getElementById("popup");
+	// positions
+	var realtime = L.realtime({
+		url: 'positions.geojson',
+		type: 'json'
+	}, {
+		interval: refreshInterval * 1000,
+		getFeatureId: function(feature) { return feature.properties.name; },
+		pointToLayer: function(feature, latlng) {
 
-	mapExtent = ol.proj.transformExtent(mapCenter, "EPSG:4326", "EPSG:3857");
-	mapCenter = [
-		(mapExtent[0] + mapExtent[2]) / 2,
-		(mapExtent[1] + mapExtent[3]) / 2,
-	];
+			// create marker icon
+			if(!markers[feature.properties.name])
+				markers[feature.properties.name] = L.marker(latlng, {
+					icon: new L.Icon({
+						iconUrl: icons[Object.keys(markers).length + 1],
+						iconSize: [32, 32],
+						iconAnchor: [16, 32],
+						popupAnchor: [16, -32],
+					})
+				});
 
-	map = new ol.Map({
-		target: "map",
-		controls: [
-			new ol.control.Zoom()
-		],
-		layers: [
-			new ol.layer.Tile({
-				source: new ol.source.OSM(),
-			}),
-			new ol.layer.Vector({
-				source: new ol.source.Vector({
-					url: dataUrl,
-					format: new ol.format.GeoJSON()
-				}),
-				style: styleFunction,
-			}),
-			new ol.layer.Image({
-				source: new ol.source.ImageStatic({
-					url: "http://daten.ec-hasslau.de/misterx/2014/spielfeld.png",
-					imageExtent: mapExtent,
-					imageSize: [1488, 1052],
-				}),
-			}),
-		],
-		overlays: [
-			new ol.Overlay({
-				element: popup,
-				positioning: 'bottom-center',
-				stopEvent: false
-			})
-		],
-		view: new ol.View({
-			center: mapCenter,
-			zoom: 15,
-		})
-	});
+			// return marker icon
+			return markers[feature.properties.name];
+		},
+		onEachFeature: function (feature, layer) { layer.bindPopup(feature.properties.name); }
+	}).addTo(map);
 
-	/* click callbacks */
-	map.on('click', function(evt) {
-		var feature = map.forEachFeatureAtPixel(evt.pixel,
-			function(feature, layer) {
-				return feature;
-		});
-		if (feature && feature.getGeometry() instanceof ol.geom.GeometryCollection) {
-			var coord = feature.getGeometry().getGeometries()[1].getCoordinates();
-			map.getOverlays().getArray()[0].setPosition(coord);
-			$(popup).popover("destroy");
-			$(popup).popover({
-				"placement": "right",
-				"content": feature.get("name"),
-			});
-			$(popup).popover("show");
-		} else {
-			$(popup).popover("destroy");
-		}
-	});
-
-	/* init refresh */
+	// refresh
+	refresh();
 	window.setInterval("refresh()", refreshInterval * 1000);
 }
 
-/* refresh positions */
 function refresh() {
-	styleId = 0;
-	map.getLayers().getArray()[1].setSource(
-		new ol.source.Vector({
-			url: dataUrl,
-			format: new ol.format.GeoJSON(),
-		})
-	);
-}
+	reqwest({
+		url: "../admin/status",
+		type: "json",
+		contentType: "application/json",
+		success: function (resp) {
+			var elems = document.getElementById("clients_table").getElementsByTagName("tr");
+			while(elems.length > 1)
+				document.getElementById("clients_table").removeChild(elems[1]);
 
-/* init after load */
-document.addEventListener("load", init, false);
-document.addEventListener("DOMContentLoaded", init, false);
+			// request status
+			for(var i = 0; i < resp.length; i++) {
+				var row1 = document.createElement("tr");
+				var row2 = document.createElement("tr");
+				var cell1 = document.createElement("td");
+				var cell2 = document.createElement("td");
+				var cell3 = document.createElement("td");
+				var cell4 = document.createElement("td");
+				var stat = document.createElement("img");
+				if(markers[resp[i].name] && markers[resp[i].name].options.icon.iconUrl)
+					stat.src = markers[resp[i].name].options.icon.iconUrl;
+				cell1.setAttribute("rowspan", 2);
+				cell1.appendChild(stat);
+				cell2.setAttribute("rowspan", 2);
+				cell2.appendChild(document.createElement("h3"));
+				cell2.firstChild.appendChild(document.createTextNode(resp[i]["name"]));
+				cell3.appendChild(document.createTextNode(resp[i]["address"]));
+				cell4.appendChild(document.createTextNode(resp[i]["time"]));
+				row1.appendChild(cell1);
+				row1.appendChild(cell2);
+				row2.appendChild(cell3);
+				row1.appendChild(cell4);
+				document.getElementById("clients_table").appendChild(row1);
+				document.getElementById("clients_table").appendChild(row2);
+			}
+		}
+	});
+}
