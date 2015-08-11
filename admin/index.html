@@ -2,22 +2,31 @@
 <html>
 	<head>
 		<title>Live Tracking Admin</title>
-		<meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-		<!-- jquery and bootstrap -->
-		<script src="../map/js/jquery-1.11.3.min.js"></script>
-		<link rel="stylesheet" href="../map/css/bootstrap.min.css">
-		<script src="../map/js/bootstrap.min.js"></script>
-		<!-- openlayers -->
-		<link rel="stylesheet" href="../map/css/ol.css" type="text/css">
-		<script src="../map/js/ol.js"></script>
+		<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width">
+		<!-- external -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="../map/css/leaflet.css" />
+		<link rel="stylesheet" href="css/leaflet-sidebar.css" />
+		<script src="../map/js/leaflet.js"></script>
+		<script src="../map/js/leaflet-realtime.min.js"></script>
+		<script src="js/leaflet-sidebar.js"></script>
+		<script src="js/reqwest.min.js"></script>
 		<!-- own -->
+		<link rel="stylesheet" href="../map/css/map.css" type="text/css">
 		<script src="../map/js/styles.js"></script>
 		<script src="../map/js/map.js"></script>
-		<link rel="stylesheet" href="../map/css/map.css" type="text/css">
 		<script src="js/admin.js"></script>
 	</head>
 	<body>
-		<div id="map"><div id="popup"></div></div>
-		<table id="clients" class="popover"><tr><th></th><th>Name</th><th>IP:Port</th><th>Time</th></tr></table>
+		<div id="map"></div>
+		<div id="custom_controls" class="leaflet-bar">
+			<a href="javascript:sidebar.toggle();void(0);"><i class="fa fa-bars"></i></a>
+		</div>
+		<div id="sidebar">
+			<h3>Clients</h3>
+			<table id="clients"><tr><th></th><th>Name</th><th>Time</th><th>IP:Port</th></tr></table>
+			<h3>SMS</h3>
+			<pre id="message"></pre>
+		</div>
 	</body>
 </html>

@@ -5,40 +5,14 @@
 		<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width">
 		<!-- external -->
 		<link rel="stylesheet" href="css/leaflet.css" />
-		<link rel="stylesheet" href="css/leaflet-sidebar.min.css" />
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />
 		<script src="js/leaflet.js"></script>
-		<script src="js/leaflet-sidebar.min.js"></script>
 		<script src="js/leaflet-realtime.min.js"></script>
-		<script src="js/reqwest.min.js"></script>
 		<!-- own -->
+		<link rel="stylesheet" href="css/map.css" type="text/css">
 		<script src="js/styles.js"></script>
 		<script src="js/map.js"></script>
-		<link rel="stylesheet" href="css/map.css" type="text/css">
 	</head>
 	<body>
-		<div id="sidebar" class="sidebar sidebar-right">
-			<!-- Nav tabs -->
-			<div class="sidebar-tabs">
-				<ul role="tablist"><li><a href="#clients" role="tab"><i class="fa fa-users"></i></a></li></ul>
-				<ul role="tablist"><li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li></ul>
-			</div>
-
-			<!-- Tab panes -->
-			<div class="sidebar-content">
-				<div class="sidebar-pane" id="clients">
-					<h1 class="sidebar-header">Clients<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
-					<table id="clients_table"></table>
-					<h1 class="sidebar-header">Logs<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
-					<div id="clients_log"></div>
-				</div>
-
-				<div class="sidebar-pane" id="settings">
-					<h1 class="sidebar-header">Settings<div class="sidebar-close"><i class="fa fa-caret-left"></i></div></h1>
-				</div>
-			</div>
-		</div>
-
-		<div id="map" class="sidebar-map"></div>
+		<div id="map"></div>
 	</body>
 </html>

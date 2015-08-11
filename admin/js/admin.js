@@ -1,41 +1,82 @@
 var refreshIntervalAdmin = 10;
+var statusIcons = {
+	connected:	"check-circle",
+	disconnected:	"power-off",
+	error:		"times-circle",
+	error_chk:	"times-circle",
+	error_msg:	"times-circle",
+	ok:		"map-marker",
+	renamed:	"user",
+	timeout:	"clock-o",
+	unknown:	"question-circle"
+};
 
+var sidebar = null;
+
+// init after load
+document.addEventListener("load", initAdmin, false);
+document.addEventListener("DOMContentLoaded", initAdmin, false);
 function initAdmin() {
-	refreshAdmin();
 
-	/* init refresh */
+	// control
+	var myControl = L.Control.extend({
+		options: { position: "topleft" },
+		onAdd: function (map) { return L.DomUtil.get("custom_controls"); }
+	});
+	map.addControl(new myControl());
+
+	// sidebar
+	sidebar = L.control.sidebar("sidebar", { position: "right" });
+	map.addControl(sidebar);
+
+	// refresh status
+	refreshAdmin();
 	window.setInterval("refreshAdmin()", refreshIntervalAdmin * 1000);
 }
 
 function refreshAdmin() {
-	$.getJSON("status", function(data) {
 
-		// clear
-		while(map.getLayers().getLength() > 3)
-			map.removeLayer(map.getLayers().getArray()[3]);
-		var elems = document.getElementById("clients").getElementsByTagName("tr");
-		while(elems.length > 1)
-			document.getElementById("clients").removeChild(elems[1]);
+	// status
+	reqwest({
+		url: "status",
+		type: "json",
+		contentType: "application/json",
+		success: function (resp) {
+			var date = new Date()
+			var message = "Stand " + date.getHours() + ":" + date.getMinutes() + " Uhr\n";
 
-		// request status
-		for(var i = 0; i < data.length; i++) {
-			var row = document.createElement("tr");
-			var cell1 = document.createElement("td");
-			var cell2 = document.createElement("td");
-			var cell3 = document.createElement("td");
-			var cell4 = document.createElement("td");
-			var stat = document.createElement("img");
-			stat.src = "img/" + data[i]["status"] + ".png";
-			//stat.alt = data[i]["status"];
-			cell1.appendChild(stat);
-			cell2.appendChild(document.createTextNode(data[i]["name"]));
-			cell3.appendChild(document.createTextNode(data[i]["address"]));
-			cell4.appendChild(document.createTextNode(data[i]["time"]));
-			row.appendChild(cell1);
-			row.appendChild(cell2);
-			row.appendChild(cell3);
-			row.appendChild(cell4);
-			document.getElementById("clients").appendChild(row);
+			// clear
+			var elems = document.getElementById("clients").getElementsByTagName("tr");
+			while(elems.length > 1)
+				document.getElementById("clients").removeChild(elems[1]);
+
+			// request status
+			for(var i = 0; i < resp.length; i++) {
+				var row = document.createElement("tr");
+				var cell1 = document.createElement("td");
+				var cell2 = document.createElement("td");
+				var cell3 = document.createElement("td");
+				var cell4 = document.createElement("td");
+				var stat = document.createElement("i");
+				stat.setAttribute("class", "fa fa-" + statusIcons[resp[i]["status"]]);
+				cell1.setAttribute("style", "text-align:center");
+				cell1.appendChild(stat);
+				cell2.appendChild(document.createTextNode(resp[i]["name"]));
+				cell3.appendChild(document.createTextNode(resp[i]["time"]));
+				cell4.appendChild(document.createTextNode(resp[i]["address"]));
+				row.appendChild(cell1);
+				row.appendChild(cell2);
+				row.appendChild(cell3);
+				row.appendChild(cell4);
+				document.getElementById("clients").appendChild(row);
+
+				// message
+				if(resp[i]["status"] == "ok")
+					message += resp[i]["name"] + "=" + "..." + "\n";
+			}
+
+			// message
+			document.getElementById("message").innerHTML = message;
 		}
 	});
 }
@@ -114,8 +155,3 @@ function submit() {
 			alert(this.status + " " + this.statusText);
 	});
 }
-
-
-/* init after load */
-document.addEventListener("load", initAdmin, false);
-document.addEventListener("DOMContentLoaded", initAdmin, false);
