@@ -65,19 +65,11 @@ while(1) {
 		}
 
 		# status request
-		elsif($data =~ /^GET \/status(|\/[^ ]*) HTTP\/([0-9.]+)$/) {
+		elsif($data =~ /^GET \/status(|\/[^ ]*|\?[^ ]*) HTTP\/([0-9.]+)$/) {
 			logging($peeraddr . " status request");
 			while(<$read>) { /^[\r\n]+$/ and last; }
-			print $read "HTTP/1.0 200 OK\nContent-type: application/json\n\n[";
-			my $i = 1;
-			foreach my $client (keys %clients) {
-				printf $read ($i++ > 1 ? "," : "") . "{\"address\":\"%s\"", $client;
-				foreach my $attrib (keys %{$clients{$client}}) {
-					printf $read ",\"%s\":\"%s\"", $attrib, $clients{$client}{$attrib};
-				}
-				print $read "}";
-			}
-			print $read "]\n";
+			print $read "HTTP/1.0 200 OK\nContent-type: application/json\n\n";
+			dumpclients($read, "geojson", 1);
 			$read_select->remove($read);
 			$read->flush();
 			$read->close();
@@ -107,7 +99,9 @@ while(1) {
 		# dump positions
 		if ($lastdumptime < time - $dumpwait) {
 			logging("dump positions");
-			dumppoints();
+			open my $fh, ">", $dumpfile;
+			dumpclients($fh, $dumpformat, 0);
+			close $fh;
 			$lastdumptime = time;
 		}
 
@@ -293,12 +287,12 @@ sub logpoint {
 }
 
 # dump last positions
-sub dumppoints {
+sub dumpclients {
+	my ($fh, $format, $full) = @_;
 	my $cnt = 0;
-	open my $fh, ">", $dumpfile;
 
 	# kml format
-	if ($dumpformat eq "kml") {
+	if ($format eq "kml") {
 		print $fh "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 		print $fh "<kml xmlns=\"http://www.opengis.net/kml/2.2\">";
 		print $fh "<Document>";
@@ -312,18 +306,24 @@ sub dumppoints {
 	}
 
 	# geojson format
-	elsif ($dumpformat eq "geojson") {
+	elsif ($format eq "geojson") {
 		print $fh '{"type":"FeatureCollection","features":[';
 		foreach my $client (keys %clients) {
 			next if !$clients{$client}{lon};
 			printf $fh "," if $cnt++ > 0;
-			printf $fh '{"type":"Feature","properties":{"name":"%s"},"geometry":{"type":"Point","coordinates":[%s,%s]}}',
-				$clients{$client}{name}, $clients{$client}{lon}, $clients{$client}{lat};
+			printf $fh '{"type":"Feature","geometry":{"type":"Point","coordinates":[%s,%s]},"properties":{"name":"%s"',
+				$clients{$client}{lon}, $clients{$client}{lat}, $clients{$client}{name};
+			if($full) {
+				printf $fh ',"address":"%s"', $client;
+				foreach my $attrib (keys %{$clients{$client}}) {
+					next if $attrib eq "lat" or $attrib eq "lon";
+					printf $fh ',"%s":"%s"', $attrib, $clients{$client}{$attrib};
+				}
+			}
+			printf $fh "}}";
 		}
 		print $fh "]}";
 	}
-
-	close $fh;
 }
 
 # log message
