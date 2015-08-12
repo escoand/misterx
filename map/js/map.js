@@ -21,7 +21,7 @@ function init() {
 
 	// positions
 	var realtime = L.realtime({
-		url: 'positions.geojson',
+		url: '../map/positions.geojson',
 		type: 'json'
 	}, {
 		interval: refreshInterval * 1000,
