@@ -1,5 +1,5 @@
-var imgBounds = [[50.711, 12.4677], [50.729, 12.5079]];
 var refreshPositions = 20;
+var areaBounds = [[50.71394, 12.475855], [50.728509, 12.502956]];
 
 var map = null;
 var markers = Array();
@@ -8,7 +8,7 @@ var markers = Array();
 document.addEventListener("load", init, false);
 document.addEventListener("DOMContentLoaded", init, false);
 function init() {
-	map = L.map("map").fitBounds(imgBounds);
+	map = L.map("map").fitBounds(areaBounds);
 
 	// map
 	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6IjZjNmRjNzk3ZmE2MTcwOTEwMGY0MzU3YjUzOWFmNWZhIn0.Y8bhBaUMqFiPrDRW9hieoQ', {
