@@ -42,6 +42,5 @@ function init() {
 			// return marker icon
 			return markers[feature.properties.name].bindPopup(feature.properties.name);
 		},
-		onEachFeature: function (feature, layer) { layer.bindPopup(feature.properties.name); }
 	}).addTo(map);
 }
