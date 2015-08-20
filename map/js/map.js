@@ -1,8 +1,10 @@
+var refreshOverlay = 120;
 var refreshPositions = 20;
 var areaBounds = [[50.71394, 12.475855], [50.728509, 12.502956]];
 
 var map = null;
 var markers = new Array();
+var autopopups = new Array();
 
 // init after load
 document.addEventListener("load", init, false);
@@ -17,7 +19,42 @@ function init() {
 	}).addTo(map);
 
 	// overlay
-	L.imageOverlay("http://daten.ec-hasslau.de/misterx/2014/spielfeld.png", imgBounds).addTo(map);
+	var realtime = L.realtime({
+		url: '../map/overlay.geojson',
+		type: 'json'
+	}, {
+		interval: refreshOverlay * 1000,
+		style: function(feature) { return { color: "#f86767" }; },
+		pointToLayer: function(feature, latlng) {
+
+			// auto popup
+			var now = Math.round((new Date()).getTime() / 1000);
+			if(feature.properties.popupfrom <= now && feature.properties.popupuntil >= now) {
+				autopopups.push(feature.properties.id);
+			}
+
+			// marker
+			return L.marker(latlng, {
+				icon: new L.Icon({
+					iconUrl: "../map/img/marker_leaflet.png",
+					shadowUrl: "../map/img/marker_shadow.png",
+					iconSize: [25, 41],
+					iconAnchor: [13, 41]
+				})
+			}).bindPopup("<h2>" + feature.properties.name + "</h2>", {
+				closeButton: false,
+				closeOnClick: true,
+				offset: [0, -23]
+			});
+		},
+	}).addTo(map);
+
+	// auto popup
+	realtime.on("update", function() {
+		for(i in autopopups)
+			realtime.getLayer(autopopups[i]).openPopup();
+		autopopups = new Array();
+	});
 
 	// positions
 	L.realtime({
