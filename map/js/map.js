@@ -1,5 +1,5 @@
-var refreshInterval = 20;
 var imgBounds = [[50.711, 12.4677], [50.729, 12.5079]];
+var refreshPositions = 20;
 
 var map = null;
 var markers = Array();
@@ -24,7 +24,7 @@ function init() {
 		url: '../map/positions.geojson',
 		type: 'json'
 	}, {
-		interval: refreshInterval * 1000,
+		interval: refreshPositions * 1000,
 		getFeatureId: function(feature) { return feature.properties.name; },
 		pointToLayer: function(feature, latlng) {
 
