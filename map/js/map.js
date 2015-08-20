@@ -2,7 +2,7 @@ var refreshPositions = 20;
 var areaBounds = [[50.71394, 12.475855], [50.728509, 12.502956]];
 
 var map = null;
-var markers = Array();
+var markers = new Array();
 
 // init after load
 document.addEventListener("load", init, false);
@@ -20,7 +20,7 @@ function init() {
 	L.imageOverlay("http://daten.ec-hasslau.de/misterx/2014/spielfeld.png", imgBounds).addTo(map);
 
 	// positions
-	var realtime = L.realtime({
+	L.realtime({
 		url: '../map/positions.geojson',
 		type: 'json'
 	}, {
@@ -40,7 +40,7 @@ function init() {
 				});
 
 			// return marker icon
-			return markers[feature.properties.name];
+			return markers[feature.properties.name].bindPopup(feature.properties.name);
 		},
 		onEachFeature: function (feature, layer) { layer.bindPopup(feature.properties.name); }
 	}).addTo(map);
