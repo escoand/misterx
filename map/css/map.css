@@ -1,4 +1,4 @@
-html,body,#map {font-family:tahoma;height:100%;margin:0;padding:0;width:100%;}
+html,body,#map {font-family:Ubuntu,sans-serif;height:100%;margin:0;padding:0;width:100%;}
 #clients {background:white;}
 #clients th,#clients td{text-align:left;padding:2px 5px;}
 pre {background:#eeeeee;border:1px solid #cccccc;padding: 5px 10px;}
