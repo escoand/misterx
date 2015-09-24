@@ -1,19 +1,66 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Live Tracking</title>
+		<title>MrX Live Karte</title>
 		<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width">
-		<!-- external -->
-		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
-		<link rel="stylesheet" type="text/css" href="css/leaflet.css" />
-		<script src="js/leaflet.js"></script>
-		<script src="js/leaflet-realtime.min.js"></script>
-		<!-- own -->
-		<link rel="stylesheet" type="text/css" href="css/map.css">
-		<script src="js/styles.js"></script>
-		<script src="js/map.js"></script>
+
+		<!-- mapbox -->
+		<script src="https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.js"></script>
+		<link href="https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.css" rel="stylesheet" />
+
+		<!-- location -->
+		<script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.43.0/L.Control.Locate.min.js"></script>
+		<link href="https://api.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.43.0/L.Control.Locate.mapbox.css" rel="stylesheet" />
+		<!--[if lt IE 9]>
+		<link href="https://api.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.43.0/L.Control.Locate.ie.css" rel="stylesheet" />
+		<![endif]-->
+
+		<style>
+		  body { margin:0; padding:0; }
+		  #map { bottom:0; position:absolute; top:0; width:100%; }
+		  .marker-title { font-size:15pt; }
+		</style>
 	</head>
 	<body>
 		<div id="map"></div>
+		<script>
+			var gameStart = new Date(2015, 09, 03, 13, 58, 00);
+			var gameEnd = new Date(2015, 09, 03, 16, 00, 00);
+
+			var positionsUrl = "positions.json";
+			var positionsInterval = 20;
+
+			// map
+			L.mapbox.accessToken = "pk.eyJ1IjoicGFzc3RzY2h1IiwiYSI6ImFwSFVvOVEifQ.djLlizVZhCdi5FCSB3U9OA";
+			var map = L.mapbox.map("map", "passtschu.n75egl1p")
+				.fitBounds([[50.71394, 12.475855], [50.728509, 12.502956]]);
+
+			// location
+			L.control.locate().addTo(map);
+
+			// positions
+			var featureLayer = L.mapbox.featureLayer()
+				.loadURL(positionsUrl)
+				.on("ready", function() {
+					autoPopup();
+					window.setTimeout(function() {
+						featureLayer.loadURL(positionsUrl);
+					}, positionsInterval * 1000);
+				})
+				.addTo(map);
+
+			// auto popup
+			function autoPopup() {
+				var now = new Date();
+				map.featureLayer.eachLayer(function(marker) {
+					if (now < gameStart && marker.feature.properties.title === "MisterX Start") {
+						marker.openPopup();
+					}
+					else if (now > gameEnd && marker.feature.properties.title === "MisterX Ziel") {
+						marker.openPopup();
+					}
+				});
+			}
+		</script>
 	</body>
 </html>
