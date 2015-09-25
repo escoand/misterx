@@ -16,7 +16,7 @@ my $trackformat = "igc";
 my $trackdir = "tracks";
 # dump last positions (geojson, kml)
 my $dumpformat = "geojson";
-my $dumpfile = "../map/positions.geojson";
+my $dumpfile = "../map/positions.json";
 my $dumpwait = 300;
 
 # open socket
