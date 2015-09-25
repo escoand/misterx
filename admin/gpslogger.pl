@@ -77,7 +77,7 @@ while(1) {
 		}
 
 		# gts http request
-		elsif($data =~ /^GET (|.*&)id=(.*).*&gprmc=(.*) HTTP\/([0-9.]+)$/) {
+		elsif($data =~ /^GET (|.*[&?])id=(.*).*&gprmc=(.*) HTTP\/([0-9.]+)$/) {
 			$clients{$peeraddr}{name} = uri_unescape($2);
 			$data = uri_unescape($3);
 			$html = $4;
