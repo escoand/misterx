@@ -311,14 +311,15 @@ sub dumpclients {
 		foreach my $client (keys %clients) {
 			next if !$clients{$client}{lon};
 			printf $fh "," if $cnt++ > 0;
-			printf $fh '{"type":"Feature","geometry":{"type":"Point","coordinates":[%s,%s]},"properties":{"name":"%s"',
+			printf $fh '{"type":"Feature","geometry":{"type":"Point","coordinates":[%s,%s]},"properties":{"title":"%s"',
 				$clients{$client}{lon}, $clients{$client}{lat}, $clients{$client}{name};
 			if($full) {
-				printf $fh ',"address":"%s"', $client;
+				my $desc = "";
 				foreach my $attrib (keys %{$clients{$client}}) {
 					next if $attrib eq "lat" or $attrib eq "lon";
-					printf $fh ',"%s":"%s"', $attrib, $clients{$client}{$attrib};
+					$desc .= $attrib . ": " . $clients{$client}{$attrib} . "<br/>";
 				}
+				printf $fh ',"description":"%s"', $desc;
 			}
 			printf $fh "}}";
 		}
