@@ -1,33 +1,41 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Live Tracking Admin</title>
+		<title>MrX Admin Karte</title>
 		<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width">
-		<!-- external -->
-		<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
-		<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />
-		<link rel="stylesheet" type="text/css" href="../map/css/leaflet.css" />
-		<link rel="stylesheet" type="text/css" href="css/leaflet-sidebar.css" />
-		<script src="../map/js/leaflet.js"></script>
-		<script src="../map/js/leaflet-realtime.min.js"></script>
-		<script src="js/leaflet-sidebar.js"></script>
-		<script src="js/reqwest.min.js"></script>
-		<!-- own -->
-		<link rel="stylesheet" type="text/css" href="../map/css/map.css">
-		<script src="../map/js/styles.js"></script>
-		<script src="../map/js/map.js"></script>
-		<script src="js/admin.js"></script>
+
+		<!-- mapbox -->
+		<script src="https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.js"></script>
+		<link href="https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.css" rel="stylesheet" />
+
+		<style>
+		  body { margin:0; padding:0; }
+		  #map { bottom:0; position:absolute; top:0; width:100%; }
+		  .marker-title { font-size:15pt; }
+		</style>
 	</head>
 	<body>
 		<div id="map"></div>
-		<div id="custom_controls" class="leaflet-bar">
-			<a href="javascript:sidebar.toggle();void(0);"><i class="fa fa-bars"></i></a>
-		</div>
-		<div id="sidebar">
-			<h3>Clients</h3>
-			<table id="clients"><tr><th></th><th>Name</th><th>Time</th><th>IP:Port</th></tr></table>
-			<h3>SMS</h3>
-			<pre id="message"></pre>
-		</div>
+		<script>
+			var positionsUrl = "status";
+			var positionsInterval = 20;
+
+			// map
+			L.mapbox.accessToken = "pk.eyJ1IjoicGFzc3RzY2h1IiwiYSI6ImFwSFVvOVEifQ.djLlizVZhCdi5FCSB3U9OA";
+			var map = L.mapbox.map("map", "passtschu.n75egl1p", { featureLayer: {
+					filter: function(feature) { return !(feature.geometry.type == "Point"); }
+				}})
+				.fitBounds([[50.71394, 12.475855], [50.728509, 12.502956]]);
+
+			// positions
+			var featureLayer = L.mapbox.featureLayer()
+				.loadURL(positionsUrl)
+				.on("ready", function() {
+					window.setTimeout(function() {
+						featureLayer.loadURL(positionsUrl);
+					}, positionsInterval * 1000);
+				})
+				.addTo(map);
+		</script>
 	</body>
 </html>
