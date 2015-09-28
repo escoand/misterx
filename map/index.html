@@ -44,6 +44,15 @@
 				.loadURL(positionsUrl)
 				.on("ready", function() {
 					autoPopup();
+
+					// styling
+					var geojson = featureLayer.getGeoJSON();
+					for(i in geojson.features)
+						for(j in styles[geojson.features[i].properties.title])
+							geojson.features[i].properties[j] = styles[geojson.features[i].properties.title][j];
+					featureLayer.setGeoJSON(geojson);
+
+					// reload
 					window.setTimeout(function() {
 						featureLayer.loadURL(positionsUrl);
 					}, positionsInterval * 1000);

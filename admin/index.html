@@ -3,15 +3,16 @@
 	<head>
 		<title>MrX Admin Karte</title>
 		<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no, width=device-width">
+		<script src="../map/styles.js"></script>
 
 		<!-- mapbox -->
 		<script src="https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.js"></script>
 		<link href="https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.css" rel="stylesheet" />
 
 		<style>
-		  body { margin:0; padding:0; }
-		  #map { bottom:0; position:absolute; top:0; width:100%; }
-		  .marker-title { font-size:15pt; }
+			body { margin:0; padding:0; }
+			#map { bottom:0; position:absolute; top:0; width:100%; }
+			.marker-title { font-size:15pt; }
 		</style>
 	</head>
 	<body>
@@ -31,6 +32,15 @@
 			var featureLayer = L.mapbox.featureLayer()
 				.loadURL(positionsUrl)
 				.on("ready", function() {
+
+					// styling
+					var geojson = featureLayer.getGeoJSON();
+					for(i in geojson.features)
+						for(j in styles[geojson.features[i].properties.title])
+							geojson.features[i].properties[j] = styles[geojson.features[i].properties.title][j];
+					featureLayer.setGeoJSON(geojson);
+
+					// reload
 					window.setTimeout(function() {
 						featureLayer.loadURL(positionsUrl);
 					}, positionsInterval * 1000);
