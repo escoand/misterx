@@ -23,7 +23,7 @@ my $dumpwait = 300;
 my $client_sock = IO::Socket::INET->new(
 	Listen		=> 20, # max clients
 	#LocalAddr	=> "127.0.0.1",
-	LocalPort	=> 5005,
+	LocalPort	=> 5055,
 	Proto		=> "tcp",
 	ReuseAddr	=> 1,
 );
@@ -65,10 +65,10 @@ while(1) {
 		}
 
 		# status request
-		elsif($data =~ /^GET \/status(|\/[^ ]*|\?[^ ]*) HTTP\/([0-9.]+)$/) {
+		elsif($data =~ /^GET \/status(|\/[^ ]*|\?[^ ]*) (HTTP\/[0-9.]+)$/) {
 			logging($peeraddr . " status request");
 			while(<$read>) { /^[\r\n]+$/ and last; }
-			print $read "HTTP/1.0 200 OK\nContent-type: application/json\n\n";
+			print $read "$2 200 OK\nContent-type: application/json\n\n";
 			dumpclients($read, "geojson", 1);
 			$read_select->remove($read);
 			$read->flush();
@@ -77,19 +77,12 @@ while(1) {
 		}
 
 		# gts http request
-		elsif($data =~ /^GET (|.*[&?])id=(.*).*&gprmc=(.*) HTTP\/([0-9.]+)$/) {
+		elsif($data =~ /^GET (|.*[&?])id=(.*).*&gprmc=(.*) (HTTP\/[0-9.]+)$/) {
 			$clients{$peeraddr}{name} = uri_unescape($2);
 			$data = uri_unescape($3);
+			$clients{$peeraddr}{proto} = $4;
+			$clients{$peeraddr}{status} = "status";
 			$html = $4;
-		}
-
-		# unknown http request
-		elsif($data =~ /^GET (.*) HTTP\/([0-9.]+)$/) {
-			logging($peeraddr . " unknown http request: " . $data);
-			while(<$read>) { /^[\r\n]+$/ and last; }
-			$read_select->remove($read);
-			$read->close();
-			next;
 		}
 
 		# default settings
@@ -105,8 +98,25 @@ while(1) {
 			$lastdumptime = time;
 		}
 
+		# http request
+		# GET /?id=311251&timestamp=1443437579&lat=50.70694738&lon=12.45908671&speed=0.0&bearing=0.0&altitude=377.0&batt=46.0 HTTP/1.1
+		if($data =~ /^GET \/\?id=(.*)&timestamp=(\d+)&lat=(\d+\.\d+)&lon=(\d+\.\d+)&speed=(\d+\.\d+)&bearing=(\d+\.\d+)&altitude=(\d+\.\d+)&batt=(\d+\.\d+) (HTTP\/[0-9.]+)$/) {
+			$clients{$peeraddr}{name} = uri_unescape($1);
+			$clients{$peeraddr}{time} = strftime "%Y-%m-%d %H:%M:%S", localtime($2);
+			$clients{$peeraddr}{lat} = $3;
+			$clients{$peeraddr}{lon} = $4;
+			$clients{$peeraddr}{speed} = $5;
+			$clients{$peeraddr}{bearing} = $6;
+			$clients{$peeraddr}{latitude} = $7;
+			$clients{$peeraddr}{battery} = $8;
+			$clients{$peeraddr}{proto} = $9;
+			$clients{$peeraddr}{status} = "ok";
+			$html = $9;
+			logpoint($clients{$peeraddr}{name}, $clients{$peeraddr}{time}, $3, $4, $5);
+		}
+
 		# checksum (xor of every byte)
-		if($data !~ s/\$(.*)\*([0-9a-zA-Z]{2})$/$1/) {
+		elsif($data !~ s/\$(.*)\*([0-9a-zA-Z]{2})$/$1/) {
 			$clients{$peeraddr}{status} = "error_msg";
 			logging($peeraddr . " wrong message: " . $data);
 		}
@@ -192,13 +202,11 @@ while(1) {
 			my $shortaddr = $peeraddr;
 			$shortaddr =~ s/:.*//;
 			while(<$read>) { /^[\r\n]+$/ and last; }
-			print $read "HTTP/$html 200 OK\n\n";
+			print $read "$html 200 OK\n\n";
 			$read_select->remove($read);
 			$read->close();
 
 			# re-index client
-			$clients{$peeraddr}{proto} = "HTML";
-			$clients{$peeraddr}{status} = "disconnected";
 			$clients{$shortaddr} = $clients{$peeraddr};
 			delete $clients{$peeraddr};
 		}
@@ -316,7 +324,7 @@ sub dumpclients {
 			if($full) {
 				my $desc = "";
 				foreach my $attrib (keys %{$clients{$client}}) {
-					next if $attrib eq "lat" or $attrib eq "lon";
+					next if $attrib eq "name" or $attrib eq "lat" or $attrib eq "lon";
 					$desc .= $attrib . ": " . $clients{$client}{$attrib} . "<br/>";
 				}
 				printf $fh ',"description":"%s"', $desc;
