@@ -39,8 +39,29 @@
 							draggable: true
 						})
 
+						// drag marker
+						.on("dragend", function(e) {
+							console.log(e);
+							if(confirm("Willst du wirklich diese neue Position setzen?")) {
+								var url = "position/?id=" + e.target.feature.properties.title
+									+ "&timestamp=" + Date.now()
+									+ "&lat=" + e.target._latlng.lat
+									+ "&lon=" + e.target._latlng.lng
+									+ "&speed=0.0&bearing=0.0&altitude=0.0&batt=0.0";
+								L.mapbox.featureLayer().loadURL(url);
+							} else
+								e.target.setLatLng(new L.LatLng(
+									e.target.feature.geometry.coordinates[1],
+									e.target.feature.geometry.coordinates[0]
+								));
+						});
+					}
+				})
 
 					// reload
+				.loadURL(positionsUrl)
+				.on("ready", function(e) {
+					console.log(e);
 					window.setTimeout(function() {
 						featureLayer.loadURL(positionsUrl);
 					}, positionsInterval * 1000);
