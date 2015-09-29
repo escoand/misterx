@@ -337,6 +337,5 @@ sub dumpclients {
 
 # log message
 sub logging {
-	my $dt = localtime();
-	printf "%s %s\n", $dt, $_[0];
+	printf "%s %s\n", strftime("%Y-%m-%d %H:%M:%S", localtime), $_[0];
 }
