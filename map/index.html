@@ -41,19 +41,17 @@
 			L.control.locate().addTo(map);
 
 			// positions
-			var featureLayer = L.mapbox.featureLayer()
+			var featureLayer = L.mapbox
+				.featureLayer(false, {
+					pointToLayer: function(feature, latlon) {
+						for(j in styles[feature.properties.title])
+							feature.properties[j] = styles[feature.properties.title][j];
+						return L.mapbox.marker.style(feature, latlon);
+					}
+				})
 				.loadURL(positionsUrl)
 				.on("ready", function() {
 					autoPopup();
-
-					// styling
-					var geojson = featureLayer.getGeoJSON();
-					for(i in geojson.features)
-						for(j in styles[geojson.features[i].properties.title])
-							geojson.features[i].properties[j] = styles[geojson.features[i].properties.title][j];
-					featureLayer.setGeoJSON(geojson);
-
-					// reload
 					window.setTimeout(function() {
 						featureLayer.loadURL(positionsUrl);
 					}, positionsInterval * 1000);
