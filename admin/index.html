@@ -29,16 +29,16 @@
 				.fitBounds([[50.71394, 12.475855], [50.728509, 12.502956]]);
 
 			// positions
-			var featureLayer = L.mapbox.featureLayer()
-				.loadURL(positionsUrl)
-				.on("ready", function() {
+			var featureLayer = L.mapbox
+				.featureLayer(false, {
+					pointToLayer: function(feature, latlon) {
+						for(j in styles[feature.properties.title])
+							feature.properties[j] = styles[feature.properties.title][j];
+						return L.marker(latlon, {
+							icon: L.mapbox.marker.icon(feature.properties),
+							draggable: true
+						})
 
-					// styling
-					var geojson = featureLayer.getGeoJSON();
-					for(i in geojson.features)
-						for(j in styles[geojson.features[i].properties.title])
-							geojson.features[i].properties[j] = styles[geojson.features[i].properties.title][j];
-					featureLayer.setGeoJSON(geojson);
 
 					// reload
 					window.setTimeout(function() {
