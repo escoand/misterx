@@ -8,7 +8,7 @@ var styles = {
 	"MrX 07": { "marker-color": "#b7ddf3", "marker-symbol": "7" },
 	"MrX 08": { "marker-color": "#cccccc", "marker-symbol": "8" },
 	"MrX 09": { "marker-color": "#1f1f1f", "marker-symbol": "9" },
-	"MrX 10": { "marker-color": "#7ec9b1", "marker-symbol": "A" },
-	"MrX 11": { "marker-color": "#1087bf", "marker-symbol": "B" },
-	"MrX 12": { "marker-color": "#eaf7ca", "marker-symbol": "C" }
+	"MrX 10": { "marker-color": "#7ec9b1", "marker-symbol": "a" },
+	"MrX 11": { "marker-color": "#1087bf", "marker-symbol": "b" },
+	"MrX 12": { "marker-color": "#eaf7ca", "marker-symbol": "c" }
 };
