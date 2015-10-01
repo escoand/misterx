@@ -261,7 +261,7 @@ sub logpoint {
 		if (! -e $filename) {
 			open $fh, ">", $filename;
 			print $fh "AXXX perl_gps_logger\n";
-			printf $fh "HFDTE%02i%02i%02i\n", strftime("%d%m%y", localtime($clients{$name}{time}));
+			printf $fh strftime("HFDTE%d%m%y", localtime($clients{$name}{time})) . "\n";
 			printf $fh "HOPLTPILOT: %s\n", $filename;
 		}
 
