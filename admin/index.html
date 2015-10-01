@@ -28,6 +28,11 @@
 				}})
 				.fitBounds([[50.71394, 12.475855], [50.728509, 12.502956]]);
 
+			// layers
+			L.control.layers({}, {
+				"Gitternetz": L.imageOverlay("grid.png", [[50.711, 12.4677], [50.729, 12.5079]])
+			}).addTo(map);
+
 			// positions
 			var featureLayer = L.mapbox
 				.featureLayer(false, {
