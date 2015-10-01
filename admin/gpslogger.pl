@@ -100,6 +100,7 @@ while(1) {
 			$clients{$name}{elevation} = $7;
 			$clients{$name}{battery} = $8;
 			$clients{$name}{protocol} = $9;
+			$clients{$name}{address} = $peeraddr;
 			logpoint($name);
 			logging($peeraddr . " http update " . $name);
 			logging($peeraddr . " disconnect");
@@ -166,6 +167,7 @@ while(1) {
 				$clients{$nmeaclients{$peeraddr}}{lon} = $lon;
 				$clients{$nmeaclients{$peeraddr}}{protocol} = "GPRMC";
 				$clients{$nmeaclients{$peeraddr}}{time} = time;
+				$clients{$nmeaclients{$peeraddr}}{address} = $peeraddr;
 				logpoint($nmeaclients{$peeraddr});
 				logging($peeraddr . " gprmc update " . $nmeaclients{$peeraddr});
 			}
