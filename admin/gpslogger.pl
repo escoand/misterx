@@ -302,13 +302,13 @@ sub dumpclients {
 
 	# geojson format
 	elsif ($format eq "geojson") {
-		print $fh '{"type":"FeatureCollection","features":[';
+		printf $fh '{"type":"FeatureCollection","time":"%s","features":[', strftime("%Y-%m-%d %H:%M:%S", localtime);
 		foreach my $client (keys %clients) {
 			printf $fh "," if $cnt++ > 0;
-			printf $fh '{"type":"Feature","geometry":{"type":"Point","coordinates":[%s,%s]},"properties":{"title":"%s","time":"%s"',
-				$clients{$client}{lon}, $clients{$client}{lat}, $client, strftime("%Y-%m-%d %H:%M:%S", localtime($clients{$client}{time}));
+			printf $fh '{"type":"Feature","geometry":{"type":"Point","coordinates":[%s,%s]},"properties":{"title":"%s"',
+				$clients{$client}{lon}, $clients{$client}{lat}, $client, ;
 			if($full) {
-				my $desc = "";
+				my $desc = strftime("time: %Y-%m-%d %H:%M:%S<br/>", localtime($clients{$client}{time}));
 				foreach my $attrib (keys %{$clients{$client}}) {
 					next if $attrib eq "lat" or $attrib eq "lon" or $attrib eq "time";
 					$desc .= $attrib . ": " . $clients{$client}{$attrib} . "<br/>";

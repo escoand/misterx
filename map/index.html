@@ -18,19 +18,22 @@
 		<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.43.0/css/font-awesome.min.css' rel='stylesheet' />
 
 		<style>
+			* { font-family:sans-serif; }
 		  body { margin:0; padding:0; }
 		  #map { bottom:0; position:absolute; top:0; width:100%; }
+			#time { bottom:10px; font-weight:bold; position:absolute; text-align:center; width:100%; }
 		  .marker-title { font-size:15pt; }
 		</style>
 	</head>
 	<body>
 		<div id="map"></div>
+		<div id="time"></div>
 		<script>
 			var gameStart = new Date(2015, 9, 3, 13, 58, 0);
 			var gameEnd = new Date(2015, 9, 3, 16, 0, 0);
 
 			var positionsUrl = "positions.json";
-			var positionsInterval = 20;
+			var positionsInterval = 30;
 
 			// map
 			L.mapbox.accessToken = "pk.eyJ1IjoicGFzc3RzY2h1IiwiYSI6ImFwSFVvOVEifQ.djLlizVZhCdi5FCSB3U9OA";
@@ -49,17 +52,23 @@
 						return L.mapbox.marker.style(feature, latlon);
 					}
 				})
+
+				// reload
 				.loadURL(positionsUrl)
-				.on("ready", function() {
-					autoPopup();
+				.on("ready", onload)
+				.on("error", onload)
+				.addTo(map);
+
+			// on load
+			function onload(e) {
+				console.log(e);
+				if(e.target && e.target._geojson && e.target._geojson.time)
+					document.getElementById("time").innerHTML = "Stand: " + e.target._geojson.time;
 					window.setTimeout(function() {
 						featureLayer.loadURL(positionsUrl);
 					}, positionsInterval * 1000);
-				})
-				.addTo(map);
 
 			// auto popup
-			function autoPopup() {
 				var now = new Date();
 				map.featureLayer.eachLayer(function(marker) {
 					if (now < gameStart && marker.feature.properties.title === "MisterX Start") {

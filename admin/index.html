@@ -10,16 +10,19 @@
 		<link href="https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.css" rel="stylesheet" />
 
 		<style>
+			* { font-family:sans-serif; }
 			body { margin:0; padding:0; }
 			#map { bottom:0; position:absolute; top:0; width:100%; }
+			#time { bottom:10px; font-weight:bold; position:absolute; text-align:center; width:100%; }
 			.marker-title { font-size:15pt; }
 		</style>
 	</head>
 	<body>
 		<div id="map"></div>
+		<div id="time"></div>
 		<script>
 			var positionsUrl = "status";
-			var positionsInterval = 20;
+			var positionsInterval = 30;
 
 			// map
 			L.mapbox.accessToken = "pk.eyJ1IjoicGFzc3RzY2h1IiwiYSI6ImFwSFVvOVEifQ.djLlizVZhCdi5FCSB3U9OA";
@@ -65,13 +68,19 @@
 
 				// reload
 				.loadURL(positionsUrl)
-				.on("ready", function(e) {
+				.on("ready", onload)
+				.on("error", onload)
+				.addTo(map);
+
+			// on load
+			function onload(e) {
 					console.log(e);
+				if(e.target && e.target._geojson && e.target._geojson.time)
+					document.getElementById("time").innerHTML = "Stand: " + e.target._geojson.time;
 					window.setTimeout(function() {
 						featureLayer.loadURL(positionsUrl);
 					}, positionsInterval * 1000);
-				})
-				.addTo(map);
+			}
 		</script>
 	</body>
 </html>
