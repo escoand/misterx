@@ -19,10 +19,10 @@
 
 		<style>
 			* { font-family:sans-serif; }
-		  body { margin:0; padding:0; }
-		  #map { bottom:0; position:absolute; top:0; width:100%; }
+			body { margin:0; padding:0; }
+			#map { bottom:0; position:absolute; top:0; width:100%; }
 			#time { bottom:10px; font-weight:bold; position:absolute; text-align:center; width:100%; }
-		  .marker-title { font-size:15pt; }
+			.marker-title { font-size:15pt; }
 		</style>
 	</head>
 	<body>
@@ -64,11 +64,11 @@
 				console.log(e);
 				if(e.target && e.target._geojson && e.target._geojson.time)
 					document.getElementById("time").innerHTML = "Stand: " + e.target._geojson.time;
-					window.setTimeout(function() {
-						featureLayer.loadURL(positionsUrl);
-					}, positionsInterval * 1000);
+				window.setTimeout(function() {
+					featureLayer.loadURL(positionsUrl);
+				}, positionsInterval * 1000);
 
-			// auto popup
+				// auto popup
 				var now = new Date();
 				map.featureLayer.eachLayer(function(marker) {
 					if (now < gameStart && marker.feature.properties.title === "MisterX Start") {

@@ -74,12 +74,12 @@
 
 			// on load
 			function onload(e) {
-					console.log(e);
+				console.log(e);
 				if(e.target && e.target._geojson && e.target._geojson.time)
 					document.getElementById("time").innerHTML = "Stand: " + e.target._geojson.time;
-					window.setTimeout(function() {
-						featureLayer.loadURL(positionsUrl);
-					}, positionsInterval * 1000);
+				window.setTimeout(function() {
+					featureLayer.loadURL(positionsUrl);
+				}, positionsInterval * 1000);
 			}
 		</script>
 	</body>
